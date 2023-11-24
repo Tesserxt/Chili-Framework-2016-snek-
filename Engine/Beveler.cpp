@@ -57,14 +57,14 @@ void Beveler::SetBaseColor(Color in_base)
 {
 	baseColor = in_base;
 	topcolor = Color(
-		int(  float(baseColor.GetR() ) * topfactor),
-		int(  float(baseColor.GetG() ) * topfactor),
-		int(  float(baseColor.GetB() ) * topfactor) );
+		int(float(baseColor.GetR() ) * topfactor),
+		int(float(baseColor.GetG() ) * topfactor),
+		int(float(baseColor.GetB() ) * topfactor));
 
 	bottomcolor = Color(
 		int(float(baseColor.GetR()) * bottomfactor),
 		int(float(baseColor.GetG()) * bottomfactor),
-		int(float(baseColor.GetB()) * bottomfactor) );
+		int(float(baseColor.GetB()) * bottomfactor));
 
 	rightcolor = Color(
 		int(float(baseColor.GetR()) * rightfactor),
@@ -86,7 +86,7 @@ void Beveler::DrawBeveledBrick(RectF& rect, int bevelsize, Graphics& gfx)
 void Beveler::DrawBevelFrame(const RectF& rect, int bevelSize, Graphics& gfx) const
 {
 	DrawOuterBevel(rect, bevelSize, gfx);
-	DrawInnerBevel(rect.GetExpanded(-float(bevelSize)), bevelSize, gfx);
+	DrawInnerBevel(rect.GetExpanded(-bevelSize), bevelSize, gfx);
 }
 
 Color Beveler::GetBaseColor() const
