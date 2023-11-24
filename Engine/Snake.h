@@ -9,10 +9,10 @@ class Snake
 public:
 	Snake(Board& brd);
 	void follow_segment();
-	void moveby(          location delta_loc);
-	void DrawSegment(     Board& brd );
+	void moveby(              location delta_loc);
+	void DrawSegment(         Board& brd );
 	void grow();
-	void speed( int& snekMotionRate );
+	void speed(               int& snekMotionRate );
 	bool isColliding(         location& target );
 	bool isCollidingToItself( location& target );
 	location getNextHeadLoc(  location& delta_loc);

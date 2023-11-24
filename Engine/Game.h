@@ -26,7 +26,9 @@
 #include "Snake.h"
 #include "Goal.h"
 #include "Board.h"
+#include "RectF.h"
 #include <random>
+
 
 class Game
 {
@@ -56,10 +58,10 @@ private:
 	bool GameIsStarted    =  false;
 	Board brd;
 	Snake snek;
+	std::mt19937 rng;
 	location delta_loc;
 	Goal goal;
-	
-	std::mt19937 rng;
+
 	int previousPortion = 0;
 
 	/********************************/

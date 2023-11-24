@@ -68,6 +68,7 @@ void Game::UpdateModel()
 			snekMotionCounter++;
 			if (snekMotionCounter >= snekMotionRate)
 			{
+				
 				snekMotionCounter = 0;
 				location NextHeadLoc = snek.getNextHeadLoc(delta_loc);
 				if (wnd.kbd.KeyIsPressed(VK_SPACE))
@@ -75,7 +76,7 @@ void Game::UpdateModel()
 					snek.grow();
 					snek.speed(snekMotionRate);
 				}
-				if (!brd.IsInsideBoard(NextHeadLoc) || snek.isCollidingToItself(NextHeadLoc))
+				if ( !brd.IsInsideBoard(NextHeadLoc) || snek.isCollidingToItself(NextHeadLoc) || brd.CheckForObstacles(NextHeadLoc) )
 				{
 					GameIsOver = true;
 				}
@@ -85,11 +86,14 @@ void Game::UpdateModel()
 					if (eating && snekMotionRate > 5)
 					{
 						snek.grow();
+						
 					}
 					snek.moveby(delta_loc);
+
 					if (eating)
 					{
 						goal.Respawn(brd, snek, rng);
+						brd.SpawnObstacles(snek, goal, rng);
 					}
 				}
 			}
@@ -112,18 +116,22 @@ void Game::ComposeFrame()
 {
 	std::uniform_int_distribution<int> dist(0,255);
 	Color c(dist(rng), dist(rng), dist(rng));
+	
 	if (GameIsStarted)
 	{
+		brd.DrawObstacles();
 		snek.DrawSegment(brd);
 		goal.Draw(brd);
 		if (GameIsOver)
 		{
 			SpriteCodex::DrawGameOver(350, 250, gfx);
 		}
-		brd.Boundary();
+		brd.DrawWalls();
 	}
 	else
 	{
 		SpriteCodex::DrawTitle( 280, 200, gfx );
 	}
+
+
 }
