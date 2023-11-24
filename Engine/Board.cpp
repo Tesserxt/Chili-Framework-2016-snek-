@@ -1,68 +1,63 @@
 #include "Board.h"
 #include "assert.h"
+#include <cmath>
+#include "snake.h"
+#include "Goal.h"
 
 Board::Board(Graphics& gfex)
 	:
-	gfx(gfex)
+	gfx(gfex),
+	in_loc{ 10,10 },
+	walls(RectF(4, 28, 2, 25), 8, { 125, 0, 128 })
 {
-	in_loc = { x1 , y1 };
+	hasObstacle.resize(walls.GetInnerBounds().right * walls.GetInnerBounds().bottom, false);
 }
 
-void Board::DrawCell(location& loc, Color c)
+void Board::DrawCell(location loc, Color c)
 {
-	assert(loc.x >= 0);
-	assert(loc.y >= 0);
-	assert(loc.x < width);
-	assert(loc.y < height);
 	gfx.DrawRectDim(loc.x * space, loc.y * space, dim, dim, c);
 }
 
-void Board::Boundary()
+void Board::DrawWalls()
 {
-	for (int i = x1 * space; i < width * space; i++)
-	{
-		gfx.PutPixel( i, y1 * space - 3, Colors::White);
-		gfx.PutPixel( i, y1 * space - 2, Colors::White ); //Top
-
-		gfx.PutPixel( i, height * space - 3, Colors::White);
-		gfx.PutPixel( i, height * space - 2, Colors::White ); //Bottom
-	}
-	for (int i = y1 * space; i < height * space; i++)
-	{
-		gfx.PutPixel( x1 * space - 3, i, Colors::White);
-		gfx.PutPixel( x1 * space - 2, i, Colors::White); //Left
-
-		gfx.PutPixel( width * space - 3, i, Colors::White);
-		gfx.PutPixel( width * space - 2, i, Colors::White); //Right
-	}
-}
-
-int Board::getx1()
-{
-	return x1;
-}
-
-int Board::gety1()
-{
-	return y1;
-}
-
-int Board::GetGridHeight()
-{
-    return height;
-}
-
-int Board::GetGridWidth()
-{
-    return width;
+	walls.Draw(gfx);
 }
 
 bool Board::IsInsideBoard( location& loc )
 {
-	return  loc.x >= x1 && loc.x < width  &&
-			loc.y >= y1 && loc.y < height;
+	return  loc.x >= walls.GetInnerBounds().left && loc.x < walls.GetInnerBounds().right &&
+		    loc.y >= walls.GetInnerBounds().top &&  loc.y < walls.GetInnerBounds().bottom ;
 }
 
-void Board::obstacle()
+bool Board::CheckForObstacles(const location& loc) const
 {
+	return hasObstacle[ loc.y * walls.GetInnerBounds().right + loc.x ];
+}
+
+void Board::SpawnObstacles(Snake& snek, class Goal& goal, std::mt19937& rng)
+{
+	std::uniform_int_distribution<int> xDist(walls.GetInnerBounds().left,walls.GetInnerBounds().right - 1);
+	std::uniform_int_distribution<int> yDist(walls.GetInnerBounds().top, walls.GetInnerBounds().bottom - 1);
+	location new_loc;
+	do
+	{
+		new_loc.x = xDist(rng);
+		new_loc.y = yDist(rng);
+
+	} while (snek.isColliding(new_loc) && CheckForObstacles(new_loc) && goal.getLoc() == new_loc );
+	
+	hasObstacle[new_loc.y * walls.GetInnerBounds().right + new_loc.x] = { true };
+
+}
+
+void Board::DrawObstacles()
+{
+	for (int i = walls.GetInnerBounds().left; i < walls.GetInnerBounds().right; i++)
+	{
+		for (int j = walls.GetInnerBounds().top; j < walls.GetInnerBounds().bottom; j++)
+		{
+			if(CheckForObstacles( {i,j} ))
+				DrawCell( {i, j}, Colors::Gray);
+		}
+	}
 }
