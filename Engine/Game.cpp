@@ -65,7 +65,7 @@ void Game::UpdateModel()
 				delta_loc = { 0, 1 };
 			}
 
-			snekMotionCounter++;
+			snekMotionCounter++;///
 			if (snekMotionCounter >= snekMotionRate)
 			{
 				
