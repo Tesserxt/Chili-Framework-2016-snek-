@@ -48,19 +48,19 @@ void Game::UpdateModel()
 	{
 		if (!GameIsOver)
 		{
-			if (wnd.kbd.KeyIsPressed(VK_RIGHT))
+			if ( wnd.kbd.KeyIsPressed(VK_RIGHT) && delta_loc.x != -1 )
 			{
 				delta_loc = { 1, 0 };
 			}
-			else if (wnd.kbd.KeyIsPressed(VK_LEFT))
+			else if (wnd.kbd.KeyIsPressed(VK_LEFT) && delta_loc.x != 1)
 			{
 				delta_loc = { -1, 0 };
 			}
-			else if (wnd.kbd.KeyIsPressed(VK_UP))
+			else if (wnd.kbd.KeyIsPressed(VK_UP) && delta_loc.y != 1 )
 			{
 				delta_loc = { 0, -1 };
 			}
-			else if (wnd.kbd.KeyIsPressed(VK_DOWN))
+			else if (wnd.kbd.KeyIsPressed(VK_DOWN) && delta_loc.y != -1 )
 			{
 				delta_loc = { 0, 1 };
 			}
@@ -76,7 +76,13 @@ void Game::UpdateModel()
 					snek.grow();
 					snek.speed(snekMotionRate);
 				}
-				if ( !brd.IsInsideBoard(NextHeadLoc) || snek.isCollidingToItself(NextHeadLoc) || brd.CheckForObstacles(NextHeadLoc) )
+				if (brd.CheckForObstacles(NextHeadLoc))
+				{
+					snekMotionRate -= 1; // increasing snek speed when eaten obstacle
+					brd.ResetObstacle(NextHeadLoc); // "Resetting obst to false to visually remove it from the board."
+					brd.maxObstacles -= 1; // "Reducing `maxObstacles` to ensure they are logically removed from the board."
+				}
+				if ( !brd.IsInsideBoard(NextHeadLoc) || snek.isCollidingToItself(NextHeadLoc) )
 				{
 					GameIsOver = true;
 				}
@@ -86,6 +92,7 @@ void Game::UpdateModel()
 					if (eating && snekMotionRate > 5)
 					{
 						snek.grow();
+						//snek.speed(snekMotionRate);
 						
 					}
 					snek.moveby(delta_loc);
@@ -93,7 +100,7 @@ void Game::UpdateModel()
 					if (eating)
 					{
 						goal.Respawn(brd, snek, rng);
-						brd.SpawnObstacles(snek, goal, rng);
+			
 					}
 				}
 			}
@@ -119,12 +126,15 @@ void Game::ComposeFrame()
 	
 	if (GameIsStarted)
 	{
+		{
+			brd.SpawnObstacles(snek, goal, rng);
+		}
 		brd.DrawObstacles();
 		snek.DrawSegment(brd);
 		goal.Draw(brd);
 		if (GameIsOver)
 		{
-			SpriteCodex::DrawGameOver(350, 250, gfx);
+			SpriteCodex::DrawGameOver(250, 250, gfx);
 		}
 		brd.DrawWalls();
 	}

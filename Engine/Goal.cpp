@@ -15,7 +15,10 @@ void Goal::Respawn( Board& brd, Snake& snek, std::mt19937& rng)
 		new_loc.x = xDist(rng);
 		new_loc.y = yDist(rng);
 
-	}while (snek.isColliding(new_loc));
+	}while (snek.isColliding(new_loc) || (brd.CheckForObstacles( {new_loc.x - 1, new_loc.y} )
+									  && brd.CheckForObstacles( {new_loc.x + 1, new_loc.y} ))
+									  || (brd.CheckForObstacles( {new_loc.x, new_loc.y - 1} )
+									  && brd.CheckForObstacles( {new_loc.x, new_loc.y + 1} )) );
 	loc = new_loc;
 	//Draw( brd );
 }

@@ -13,7 +13,7 @@ Walls::Walls(const RectF& in_innerbounds, int in_thickness, Color baseColor)
 
 void Walls::Draw(Graphics& gfx)
 {
-	int dim = SPACE;
+	int dim = DIM;
 	bevel.DrawBevelFrame((innerbounds * dim ).GetExpanded(thickness) , thickness/2 , gfx);
 }
 

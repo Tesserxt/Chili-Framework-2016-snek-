@@ -10,12 +10,12 @@ Board::Board(Graphics& gfex)
 	in_loc{ 10,10 },
 	walls(RectF(4, 28, 2, 25), 8, { 125, 0, 128 })
 {
-	hasObstacle.resize(walls.GetInnerBounds().right * walls.GetInnerBounds().bottom, false);
+	hasObstacle.resize( (walls.GetInnerBounds().right + 1 )* (walls.GetInnerBounds().bottom + 1), false); //incrementing height and width by + 1 for nextHeadLocation
 }
 
 void Board::DrawCell(location loc, Color c)
 {
-	gfx.DrawRectDim(loc.x * space, loc.y * space, dim, dim, c);
+	gfx.DrawRectDim(loc.x * dim + cellpadding, loc.y * dim + cellpadding, dim - cellpadding * 2, dim - cellpadding * 2, c);
 }
 
 void Board::DrawWalls()
@@ -36,7 +36,22 @@ bool Board::CheckForObstacles(const location& loc) const
 
 void Board::SpawnObstacles(Snake& snek, class Goal& goal, std::mt19937& rng)
 {
-	std::uniform_int_distribution<int> xDist(walls.GetInnerBounds().left,walls.GetInnerBounds().right - 1);
+	obstSpawned = 0;
+	for (int y = walls.GetInnerBounds().top; y < walls.GetInnerBounds().bottom; y++)
+	{
+		for (int x = walls.GetInnerBounds().left; x < walls.GetInnerBounds().right; x++)
+		{
+			if (CheckForObstacles({ x,y }))
+			{
+				obstSpawned++;
+				if (obstSpawned > maxObstacles) // max 549
+				{
+					return;
+				}
+			}
+		}
+	}
+	std::uniform_int_distribution<int> xDist(walls.GetInnerBounds().left,walls.GetInnerBounds().right - 1 );
 	std::uniform_int_distribution<int> yDist(walls.GetInnerBounds().top, walls.GetInnerBounds().bottom - 1);
 	location new_loc;
 	do
@@ -44,20 +59,29 @@ void Board::SpawnObstacles(Snake& snek, class Goal& goal, std::mt19937& rng)
 		new_loc.x = xDist(rng);
 		new_loc.y = yDist(rng);
 
-	} while (snek.isColliding(new_loc) && CheckForObstacles(new_loc) && goal.getLoc() == new_loc );
+	} while(snek.isColliding(new_loc) || CheckForObstacles(new_loc) || goal.getLoc() == new_loc  );
 	
-	hasObstacle[new_loc.y * walls.GetInnerBounds().right + new_loc.x] = { true };
-
+	if( obstSpawned < maxObstacles )
+		hasObstacle[new_loc.y * walls.GetInnerBounds().right + new_loc.x] = { true };
 }
 
 void Board::DrawObstacles()
 {
-	for (int i = walls.GetInnerBounds().left; i < walls.GetInnerBounds().right; i++)
+	for (int y = walls.GetInnerBounds().top; y < walls.GetInnerBounds().bottom;y++)
 	{
-		for (int j = walls.GetInnerBounds().top; j < walls.GetInnerBounds().bottom; j++)
+		for (int x = walls.GetInnerBounds().left; x < walls.GetInnerBounds().right; x++)
 		{
-			if(CheckForObstacles( {i,j} ))
-				DrawCell( {i, j}, Colors::Gray);
+			if (CheckForObstacles({ x,y }))
+			{
+				DrawCell({ x,y }, Colors::Magenta);
+				//gfx.DrawRectDim(x * dim, y * dim, dim, dim, Colors::Gray);
+				//i++;
+			}
 		}
 	}
+}
+
+void Board::ResetObstacle(location& loc)
+{
+	hasObstacle[loc.y * walls.GetInnerBounds().right + loc.x] = false;
 }
